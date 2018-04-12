@@ -46,7 +46,7 @@
             <configuration>
               <includeScope>provided</includeScope>
               <includes>META-INF/resources/**</includes>
-              <outputDirectory>${project.build.directory}/unpacked</outputDirectory>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
             </configuration>
           </execution>
         </executions>
