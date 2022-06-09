@@ -22,15 +22,13 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -71,9 +69,9 @@ public class ServerTest
     @Test
     public void testGetBootStrapResource() throws Exception
     {
-        String bootstrapVersion = findVersion(ServerTest.class.getClassLoader(), "/webjars/bootstrap/");
+        String bootstrapFile = findMetaInfResourceFile(ServerTest.class.getClassLoader(), "/webjars/bootstrap/", "bootstrap\\.css");
 
-        HttpURLConnection http = (HttpURLConnection)serverBaseURI.resolve("/webjars/bootstrap/" + bootstrapVersion + "/css/bootstrap.css").toURL().openConnection();
+        HttpURLConnection http = (HttpURLConnection)serverBaseURI.resolve(bootstrapFile).toURL().openConnection();
         http.connect();
         dumpRequestResponse(http);
         assertEquals(HttpURLConnection.HTTP_OK, http.getResponseCode());
@@ -81,11 +79,11 @@ public class ServerTest
     }
 
     @Test
-    public void testGetJQueryResource() throws Exception
+    public void testGetPopperResource() throws Exception
     {
-        String jqueryVersion = findVersion(ServerTest.class.getClassLoader(), "/webjars/jquery/");
+        String popperFile = findMetaInfResourceFile(ServerTest.class.getClassLoader(), "/webjars/popper.js/", "popper\\.js");
 
-        HttpURLConnection http = (HttpURLConnection)serverBaseURI.resolve("/webjars/jquery/" + jqueryVersion + "/jquery.js").toURL().openConnection();
+        HttpURLConnection http = (HttpURLConnection)serverBaseURI.resolve(popperFile).toURL().openConnection();
         http.connect();
         dumpRequestResponse(http);
         assertEquals(HttpURLConnection.HTTP_OK, http.getResponseCode());
@@ -97,27 +95,53 @@ public class ServerTest
      *
      * @param classLoader the classloader to look in
      * @param prefix the prefix webjar to look for.
-     * @return the version found.
+     * @param regex the regex to match the first hit against.
+     * @return the found resource
      */
-    private String findVersion(ClassLoader classLoader, String prefix) throws IOException
+    private String findMetaInfResourceFile(ClassLoader classLoader, String prefix, String regex) throws IOException
     {
         List<URL> hits = Collections.list(classLoader.getResources("META-INF/resources" + prefix));
         for (URL hit : hits)
         {
             try (Resource res = Resource.newResource(hit))
             {
-                for (String content : res.list())
+                Resource match = findNestedResource(res, regex);
+                if (match != null)
                 {
-                    if (content.matches("^[0-9.]+.*"))
-                    {
-                        if (content.endsWith("/"))
-                            return content.substring(0,content.length() - 1);
-                        return content;
-                    }
+                    String rawpath = match.toString();
+                    int idx;
+
+                    // use only part after `!/`
+                    idx = rawpath.lastIndexOf("!/");
+                    if (idx >= 0)
+                        rawpath = rawpath.substring(idx + 2);
+
+                    // find substring starting at prefix
+                    idx = rawpath.indexOf(prefix);
+                    if (idx >= 0)
+                        return rawpath.substring(idx);
+                    return rawpath;
                 }
             }
         }
-        throw new RuntimeException("Unable to find version for " + prefix);
+        throw new RuntimeException("Unable to find resource [" + regex + "] in " + prefix);
+    }
+
+    private Resource findNestedResource(Resource res, String regex) throws IOException
+    {
+        for (String content : res.list())
+        {
+            Resource subresource = res.addPath(content);
+            if (content.matches(regex))
+                return subresource;
+            if (subresource.isDirectory())
+            {
+                Resource nested = findNestedResource(subresource, regex);
+                if (nested != null)
+                    return nested;
+            }
+        }
+        return null;
     }
 
     private static void dumpRequestResponse(HttpURLConnection http)
