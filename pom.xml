@@ -56,27 +56,6 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <!--<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>unpack-resources</id>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeScope>provided</includeScope>
-              <includes>META-INF/resources/**</includes>
-              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>-->
-    </plugins>
-
     <pluginManagement>
       <plugins>
         <plugin>
