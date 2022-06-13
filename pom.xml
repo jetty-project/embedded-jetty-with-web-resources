@@ -31,7 +31,7 @@
     <maven.war.plugin.version>3.3.2</maven.war.plugin.version>
     <license.plugin.version>4.1</license.plugin.version>
 
-    <jetty.version>9.4.46.v20220331</jetty.version>
+    <jetty.version>9.4.47.v20220610</jetty.version>
     <bootstrap.version>5.1.3</bootstrap.version>
     <junit.version>5.8.2</junit.version>
   </properties>
