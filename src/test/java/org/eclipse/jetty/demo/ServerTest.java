@@ -78,18 +78,6 @@ public class ServerTest
         assertEquals("text/css", http.getHeaderField("Content-Type"));
     }
 
-    @Test
-    public void testGetPopperResource() throws Exception
-    {
-        String popperFile = findMetaInfResourceFile(ServerTest.class.getClassLoader(), "/webjars/popper.js/", "popper\\.js");
-
-        HttpURLConnection http = (HttpURLConnection)serverBaseURI.resolve(popperFile).toURL().openConnection();
-        http.connect();
-        dumpRequestResponse(http);
-        assertEquals(HttpURLConnection.HTTP_OK, http.getResponseCode());
-        assertEquals("application/javascript", http.getHeaderField("Content-Type"));
-    }
-
     /**
      * Find the actual version in the jar files, so we don't have to hardcode the version in the testcases.
      *
