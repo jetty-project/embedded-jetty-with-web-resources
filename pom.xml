@@ -33,7 +33,7 @@
 
     <jetty.version>11.0.12</jetty.version>
     <bootstrap.version>5.2.0</bootstrap.version>
-    <junit.version>5.9.0</junit.version>
+    <junit.version>5.9.1</junit.version>
   </properties>
 
   <dependencies>
