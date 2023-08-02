@@ -23,7 +23,7 @@
     <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
 
     <jetty.version>10.0.15</jetty.version>
-    <bootstrap.version>5.3.0</bootstrap.version>
+    <bootstrap.version>5.3.1</bootstrap.version>
     <junit.version>5.10.0</junit.version>
   </properties>
 
