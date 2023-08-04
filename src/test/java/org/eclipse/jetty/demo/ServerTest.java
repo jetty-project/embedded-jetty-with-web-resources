@@ -27,13 +27,12 @@ import java.util.List;
 
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ServerTest
 {
@@ -91,8 +90,9 @@ public class ServerTest
         List<URL> hits = Collections.list(classLoader.getResources("META-INF/resources" + prefix));
         for (URL hit : hits)
         {
-            try (Resource res = Resource.newResource(hit))
+            try (ResourceFactory.Closeable resourceFactory = ResourceFactory.closeable())
             {
+                Resource res = resourceFactory.newResource(hit);
                 Resource match = findNestedResource(res, regex);
                 if (match != null)
                 {
@@ -117,10 +117,9 @@ public class ServerTest
 
     private Resource findNestedResource(Resource res, String regex) throws IOException
     {
-        for (String content : res.list())
+        for (Resource subresource : res.list())
         {
-            Resource subresource = res.addPath(content);
-            if (content.matches(regex))
+            if (subresource.getFileName().matches(regex))
                 return subresource;
             if (subresource.isDirectory())
             {

@@ -12,8 +12,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
 
     <maven.clean.plugin.version>3.3.1</maven.clean.plugin.version>
     <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
@@ -22,15 +22,15 @@
     <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
     <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
 
-    <jetty.version>11.0.15</jetty.version>
+    <jetty.version>12.0.0</jetty.version>
     <bootstrap.version>5.3.1</bootstrap.version>
     <junit.version>5.10.0</junit.version>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet</artifactId>
+      <groupId>org.eclipse.jetty.ee10</groupId>
+      <artifactId>jetty-ee10-servlet</artifactId>
       <version>${jetty.version}</version>
     </dependency>
     <dependency>
@@ -87,4 +87,16 @@
       </plugins>
     </pluginManagement>
   </build>
+  <repositories>
+    <repository>
+      <id>jetty-staging</id>
+      <url>https://oss.sonatype.org/content/groups/jetty-with-staging/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
 </project>

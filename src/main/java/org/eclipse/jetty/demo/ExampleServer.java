@@ -18,28 +18,21 @@
 
 package org.eclipse.jetty.demo;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.resource.JarFileResource;
-import org.eclipse.jetty.util.resource.JarResource;
-import org.eclipse.jetty.util.resource.PathResource;
 import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceCollection;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 
 public class ExampleServer
 {
@@ -57,12 +50,12 @@ public class ExampleServer
     {
         server = new Server(port);
 
-        HandlerList handlers = new HandlerList();
-
         ServletContextHandler context = new ServletContextHandler();
         context.setContextPath("/");
+        server.setDefaultHandler(new DefaultHandler());
 
-        Resource manifestResources = findManifestResources(ExampleServer.class.getClassLoader());
+        ResourceFactory resourceFactory = ResourceFactory.of(context);
+        Resource manifestResources = resourceFactory.newResource(findManifestResources(ExampleServer.class.getClassLoader()));
         context.setBaseResource(manifestResources);
 
         // Add something to serve the static files
@@ -70,35 +63,34 @@ public class ExampleServer
         ServletHolder staticHolder = new ServletHolder("default", DefaultServlet.class);
         context.addServlet(staticHolder, "/");
 
-        handlers.addHandler(context);
-        handlers.addHandler(new DefaultHandler()); // always last handler
-
-        server.setHandler(handlers);
+        server.setHandler(context);
         return server;
     }
 
-    private Resource findManifestResources(ClassLoader classLoader) throws IOException
+    private List<URI> findManifestResources(ClassLoader classLoader) throws IOException
     {
-        List<URL> hits = Collections.list(classLoader.getResources("META-INF/resources"));
-        int size = hits.size();
-        Resource[] resources = new Resource[hits.size()];
-        for (int i = 0; i < size; i++)
+        return Collections.list(classLoader.getResources("META-INF/resources"))
+            .stream()
+            .map(ExampleServer::toURI)
+            .filter(Objects::nonNull)
+            .toList();
+    }
+
+    protected static URI toURI(URL url)
+    {
+        try
         {
-            resources[i] = Resource.newResource(hits.get(i));
+            return url.toURI();
         }
-        return new ResourceCollection(resources);
+        catch (URISyntaxException e)
+        {
+            e.printStackTrace(System.err);
+            return null;
+        }
     }
 
     public Server getServer()
     {
         return server;
-    }
-
-    private void ensureDirExists(Path path) throws IOException
-    {
-        if (!Files.exists(path))
-        {
-            Files.createDirectories(path);
-        }
     }
 }
