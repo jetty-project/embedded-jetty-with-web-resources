@@ -25,7 +25,7 @@
 
     <jetty.version>9.4.53.v20231009</jetty.version>
     <bootstrap.version>5.3.2</bootstrap.version>
-    <junit.version>5.10.0</junit.version>
+    <junit.version>5.10.1</junit.version>
   </properties>
 
   <dependencies>
